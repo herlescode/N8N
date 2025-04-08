@@ -1,0 +1,359 @@
+{
+  "name": "-Post no instagram2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "=https://drive.google.com/drive/folders/1MQDcfV2L86JZDHwbeyDbhAyO4ASBWwcW?hl=pt-br",
+          "mode": "url"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -80
+      ],
+      "id": "1c7f9ed5-5f6f-4565-83e1-85276fc16379",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7l7G90tKuQM17fPH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -160,
+        -80
+      ],
+      "id": "fdafaa45-c6ff-449e-a5e4-c383d0c00c44",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7l7G90tKuQM17fPH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.name }}"
+            },
+            {
+              "content": "=Você é habilidoso em escrever legendas detalhadas com base no nome de um arquivo. Escreva uma legenda clara e envolvente que ajuda os espectadores a entender e apreciar a publicação sem usar palavras excessivamente fantasiosas ou muitos adjetivos. Torne-a relável e adequada para um público do Instagram, incentivando as pessoas a se conectarem com a postagem e responderem nos comentários. Não use emojis. Não adicione hashtags. Não inclua aspas. Use menos adjetivos.",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        60,
+        -80
+      ],
+      "id": "84477380-2a31-4d1b-9116-6d17703c2e38",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "YGTnaJqjktesz2kH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appZ4oY9u1ICwCeN9",
+          "mode": "list",
+          "cachedResultName": "Postagem no Insta",
+          "cachedResultUrl": "https://airtable.com/appZ4oY9u1ICwCeN9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl7ORyIBcuYqLSk2",
+          "mode": "list",
+          "cachedResultName": "Midia",
+          "cachedResultUrl": "https://airtable.com/appZ4oY9u1ICwCeN9/tbl7ORyIBcuYqLSk2"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Google Drive').item.json.name }}",
+            "URL": "={{ $('Google Drive').item.json.webContentLink }}",
+            "Caption": "={{ $json.message.content }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        -80
+      ],
+      "id": "1ff5e315-e26e-4b91-b2a3-56d911962d22",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ipCVrap2ur6FdtcY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": " 17841438528208478",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "video_url",
+                "value": "={{ $json.fields.URL }}"
+              },
+              {
+                "name": "media_type",
+                "value": "REELS"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('OpenAI1').item.json.message.content }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -80
+      ],
+      "id": "158a5dc1-f0d4-4315-a7b6-88304e1240ec",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "plbO1eZQmreVbbGC",
+          "name": "Facebook Graph account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": " 17841438528208478",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        -80
+      ],
+      "id": "6282aed5-ef0f-416a-bd9c-8c360b0f4611",
+      "name": "Facebook Graph API1",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "plbO1eZQmreVbbGC",
+          "name": "Facebook Graph account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 40
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        -80
+      ],
+      "id": "a8a11223-1181-458e-ada1-c7cd9a978423",
+      "name": "Wait",
+      "webhookId": "662dcc0e-2374-444e-84ac-c18a4ecc4de1"
+    },
+    {
+      "parameters": {
+        "height": 320,
+        "width": 1820
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -500,
+        -180
+      ],
+      "typeVersion": 1,
+      "id": "1bcf27ef-3a8a-46e9-8ea8-69eb961d2820",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2f8a04b2-6651-4c5a-bda9-c357d26b902e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ef267a26857af28341f2010fdf4502dc862f239e8fd42302b1ce6f5544e5252c"
+  },
+  "id": "qpQkzO3MAB8E4JRj",
+  "tags": []
+}

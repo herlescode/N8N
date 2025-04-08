@@ -1,0 +1,50 @@
+{
+  "businesses": {
+    "data": [
+      {
+        "instagram_business_accounts": {
+          "data": [
+            {
+              "id": "17841438528208478"
+            }
+          ],
+          "paging": {
+            "cursors": {
+              "before": "QVFIUkhvVzJETlV6eFlHXzRJWmZAxeWlkQVVxVnR1RmlhbHNKT0p1bi1ueEowVDFpVEhJR0NqT19YRXJMQkQ0eWNyWmEtTDRuQ1BELVVPZAHF2RXRha3lSZAUNn",
+              "after": "QVFIUkhvVzJETlV6eFlHXzRJWmZAxeWlkQVVxVnR1RmlhbHNKT0p1bi1ueEowVDFpVEhJR0NqT19YRXJMQkQ0eWNyWmEtTDRuQ1BELVVPZAHF2RXRha3lSZAUNn"
+            }
+          }
+        },
+        "id": "919729549730115"
+      }
+    ],
+    "paging": {
+      "cursors": {
+        "before": "QVFIUjRyVjdBUjJDNkJVTFJLVUNWT05qdml2YnhCS1JaenFVQlJaV3B5R3kxVXV6UFJkMFZAScHhtN1EtRjJ6RGpxYTQyZA1ZA5RHhxRUx5dE9Sb3luR1ZAQSlFR",
+        "after": "QVFIUkxXbUJwVmp5UEJtZAmF1djlhY1Myal9ZAbjlQMU1yUFdRNVAtY1diNFpiNFhpNGxJUUlKZA1phcXNoU2Rta0lvOWpCWEVvQ29qRVM0RFBBdThoZAk5TUTd3"
+      }
+    }
+  },
+  "id": "122213851622186739"
+}
+
+
+Token de acesso
+
+EAAd8iRNZBxbUBO2wGfeHSyEAuqZAwZCGfrrCUfWKRr5H1ZAVycqOVF9LCKV4pkPUA8jyUtNfMDnH4gqnZA16mFls7EEi1Jc6dZBAGT4la3GGgyF3H7onEEU2SISpRfLjKs5NbdVZBTycTZCcY2ilMozeQHk2C7LPQAmy9Pxg17GzUYj2BZCZC2HNPA2M78cSR56OQuqRuuMVfNgx5AGR2qrAZDZD
+
+Token de acesso
+Extendido
+EAAd8iRNZBxbUBO9wI9Uc1gZB3MOBnUuNXXAKQi06HBcmGdsZAL7apWuoWN7FjNYp0bzEqLsmpbGekK35qd4o098ofYL4RogGbNcNVzPAU2tysWJeYkJEtycmZBhtsgT8ND68CLQ7TR3VZCfSG0zCZCZCgHhmpgkaYSnIZBypuliaNZCFYCZCW0C6UmIVZCi
+
+https://graph.facebook.com/v22.0/634220599773945/media
+https://graph.facebook.com/v22.0/17841438528208478/media_publish
+
+
+TOKEN DE ACESSO NO AIRTABLE
+patnzmhUZQRBbGvWX.9ac29a7daadb5cfb6aa026ea9fbf4c54d8756c6cf588b8d910e0bcb4fe90bbdf
+
+
+Instagram token 60dias 
+
+EAAd8iRNZBxbUBOZBDuz2xe6vtsgo1tlUB7AfdPIiWGPqWaazIpZC0pJFLUQ2Dc8bZAcqP5dibSB8ZADW0GfMb071El6T2ZA5q3c380Qozbew2ppRM423EXeQZBfqUoFg0EaEjZAM1e3DbZCf64ksreGu8yY1pqkcyfEUWaCkuEj6VExVBT1SRLMUiMcypVCeZCWMvbQycjsGZAQ5NCLImK0bXmFcZBipEYv0K9hTiWyYwRwU

@@ -1,0 +1,387 @@
+{
+  "name": "Postagem no instagram",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "bb06b594-c154-4b2b-95a4-856cab1fb527",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Obtém os dados de entrada do Google Sheets\nconst inputData = $input.item.json;\nconsole.log(\"Dados recebidos:\", JSON.stringify(inputData, null, 2));\n\n// Obtém a data atual no formato YYYY-MM-DD\nconst today = new Date().toISOString().split('T')[0];\n\n// Converte a data da planilha para o formato correto (se necessário)\nlet sheetDate = inputData.data;\n\n// Caso a data esteja em outro formato (exemplo: DD/MM/YYYY), converte para YYYY-MM-DD\nif (/\\d{2}\\/\\d{2}\\/\\d{4}/.test(sheetDate)) {\n    const [dia, mes, ano] = sheetDate.split('/');\n    sheetDate = `${ano}-${mes}-${dia}`;\n}\n\n// Verifica se a data da linha é igual à data de hoje ou se a linha ainda não foi postada\nif (sheetDate === today || !inputData.postado || inputData.postado === \"false\") {\n    return {\n        json: {\n            rowData: inputData,\n            rowIndex: inputData.row_number, // Mantém o índice da linha original\n            sheetData: {\n                documentId: inputData.documentId || inputData.sheetId || \"ID_DESCONHECIDO\",\n                sheetName: inputData.sheetName || \"Postagens\"\n            }\n        }\n    };\n}\n\n// Se nenhuma linha disponível for encontrada, lança um erro\nthrow new Error('🚨 Nenhuma linha disponível para postagem na planilha. Verifique se há dados não postados.');\n"
+      },
+      "id": "7da3f69a-0781-4619-83d6-dce66f47671b",
+      "name": "Selecionar Linha",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "useQueryString": true,
+        "queryString": "='1MQDcfV2L86JZDHwbeyDbhAyO4ASBWwcW' in parents",
+        "options": {}
+      },
+      "id": "1ffb8f6e-0200-47b4-afed-daf708b14129",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -60
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7l7G90tKuQM17fPH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "4d0472eb-4317-4a27-901b-d8478cf9b5e7",
+      "name": "Google Drive Download",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        740,
+        -60
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7l7G90tKuQM17fPH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini-2024-07-18",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "Você é um especialista em marketing digital e automações para redes sociais, focado em criar legendas engajadoras para o Instagram. Seu objetivo é melhorar o texto fornecido para que ele seja mais envolvente e otimizado para engajamento."
+            },
+            {
+              "content": "=Preciso de uma legenda atraente para uma postagem no Instagram baseada nas seguintes informações:\n\nTítulo: {{$node[\"Selecionar Linha\"].json[\"rowData\"][\"titulo\"]}}\n\nDescrição breve: {{$node[\"Selecionar Linha\"].json[\"rowData\"][\"descricao\"]}}\n\nPalavras-chave: {{$node[\"Selecionar Linha\"].json[\"rowData\"][\"palavras_chave\"]}}\n\nPor favor, crie uma legenda envolvente que utilize esses elementos, tenha no máximo 2000 caracteres, e inclua hashtags relevantes no final. A legenda deve ser direta, pessoal e convidativa."
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "95565913-1322-4da4-9f05-e90cc5a9b85e",
+      "name": "OpenAI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        180
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YGTnaJqjktesz2kH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Receber dados da linha selecionada e do arquivo do Drive\nconst sheetData = $input.all()[0].json; // Primeira entrada (Google Sheets)\nconst binaryData = $input.all()[1]?.binary || $input.all()[0]?.binary; // Dados binários (Google Drive)\n\n// Obter a resposta da OpenAI - corrigindo o caminho\nconst openAiResponse = $input.all().find(item => item.json?.message?.content);\nconst aiGeneratedCaption = openAiResponse?.json?.message?.content || \"Legenda padrão\";\n\n// Formatar a legenda final\nconst finalCaption = aiGeneratedCaption;\n\n// Preparar saída - corrigindo o caminho para fileName\nreturn {\n  json: {\n    caption: finalCaption,\n    mediaType: \"IMAGE\",\n    fileName: binaryData?.fileName || $input.all()[1]?.json?.name || \"arquivo_desconhecido.jpg\",\n    rowIndex: sheetData?.rowIndex,\n    sheetData: sheetData?.sheetData\n  },\n  binary: binaryData\n};"
+      },
+      "id": "2fe0f590-eb17-40c4-88b3-21cdde428a96",
+      "name": "Preparar Postagem",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        740,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/17841438528208478/media",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAAd8iRNZBxbUBO9wI9Uc1gZB3MOBnUuNXXAKQi06HBcmGdsZAL7apWuoWN7FjNYp0bzEqLsmpbGekK35qd4o098ofYL4RogGbNcNVzPAU2tysWJeYkJEtycmZBhtsgT8ND68CLQ7TR3VZCfSG0zCZCZCgHhmpgkaYSnIZBypuliaNZCFYCZCW0C6UmIVZCi"
+            },
+            {
+              "name": "image_url",
+              "value": "https://i.ibb.co/DgrrCm4R/automa-o.png"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.caption }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2faff352-b8e4-435b-a653-8c4e8e33e6e8",
+      "name": "Instagram Post Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        960,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4a63fbd5-28c1-4a1d-ac96-0dad9e5579fb",
+              "leftValue": "{{$json.parents.join(',')}}.includes('1MQDcfV2L86JZDHwbeyDbhAyO4ASBWwcW')",
+              "rightValue": "MQDcfV2L86JZDHwbeyDbhAyO4ASBWwcW",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        540,
+        -60
+      ],
+      "id": "1c3abd9b-be0f-4f35-a83c-39fc7f73cb81",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/17841438528208478/media_publish",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "access_token",
+              "value": "EAAd8iRNZBxbUBO9wI9Uc1gZB3MOBnUuNXXAKQi06HBcmGdsZAL7apWuoWN7FjNYp0bzEqLsmpbGekK35qd4o098ofYL4RogGbNcNVzPAU2tysWJeYkJEtycmZBhtsgT8ND68CLQ7TR3VZCfSG0zCZCZCgHhmpgkaYSnIZBypuliaNZCFYCZCW0C6UmIVZCi"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "95e64217-fc95-4f8f-a47d-7a69a6c5c5f5",
+      "name": "Instagram Post Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1200,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Postagem automatizada no Instagram",
+        "height": 580,
+        "width": 1780,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -360,
+        -200
+      ],
+      "typeVersion": 1,
+      "id": "0a0ccf96-aab8-4f1c-ba0a-adf269fa3ec2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11Q0bQHno4VilC7ucbuLlQ-C4ZZPmkeg4iBI7GIhb02o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "0",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "14a0645e-cf65-4a41-8228-f732a60a756b",
+      "name": "Planilha post_insta",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        -60
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nc6bQ3y0dmQHXGmT",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Planilha post_insta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecionar Linha": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Download": {
+      "main": [
+        [
+          {
+            "node": "Preparar Postagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Preparar Postagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Postagem": {
+      "main": [
+        [
+          {
+            "node": "Instagram Post Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Post Request": {
+      "main": [
+        [
+          {
+            "node": "Instagram Post Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Google Drive Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Planilha post_insta": {
+      "main": [
+        [
+          {
+            "node": "Selecionar Linha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ed231343-7526-42c4-8fce-e31a51778cfa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ef267a26857af28341f2010fdf4502dc862f239e8fd42302b1ce6f5544e5252c"
+  },
+  "id": "oVwIu31kNW4Yd9IO",
+  "tags": []
+}

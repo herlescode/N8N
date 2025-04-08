@@ -1,0 +1,22 @@
+// Receber dados da linha selecionada e do arquivo do Drive
+const sheetData = $input.all()[0].json; // Primeira entrada (Google Sheets)
+const binaryData = $input.all()[1]?.binary || $input.all()[0]?.binary; // Dados binários (Google Drive)
+
+// Obter a resposta da OpenAI - corrigindo o caminho
+const openAiResponse = $input.all().find(item => item.json?.message?.content);
+const aiGeneratedCaption = openAiResponse?.json?.message?.content || "Legenda padrão";
+
+// Formatar a legenda final
+const finalCaption = aiGeneratedCaption;
+
+// Preparar saída - corrigindo o caminho para fileName
+return {
+  json: {
+    caption: finalCaption,
+    mediaType: "IMAGE",
+    fileName: binaryData?.fileName || $input.all()[1]?.json?.name || "arquivo_desconhecido.jpg",
+    rowIndex: sheetData?.rowIndex,
+    sheetData: sheetData?.sheetData
+  },
+  binary: binaryData
+};

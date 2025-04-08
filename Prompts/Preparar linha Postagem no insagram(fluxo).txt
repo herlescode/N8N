@@ -1,0 +1,32 @@
+// Obtém os dados de entrada do Google Sheets
+const inputData = $input.item.json;
+console.log("Dados recebidos:", JSON.stringify(inputData, null, 2));
+
+// Obtém a data atual no formato YYYY-MM-DD
+const today = new Date().toISOString().split('T')[0];
+
+// Converte a data da planilha para o formato correto (se necessário)
+let sheetDate = inputData.data;
+
+// Caso a data esteja em outro formato (exemplo: DD/MM/YYYY), converte para YYYY-MM-DD
+if (/\d{2}\/\d{2}\/\d{4}/.test(sheetDate)) {
+    const [dia, mes, ano] = sheetDate.split('/');
+    sheetDate = `${ano}-${mes}-${dia}`;
+}
+
+// Verifica se a data da linha é igual à data de hoje ou se a linha ainda não foi postada
+if (sheetDate === today || !inputData.postado || inputData.postado === "false") {
+    return {
+        json: {
+            rowData: inputData,
+            rowIndex: inputData.row_number, // Mantém o índice da linha original
+            sheetData: {
+                documentId: inputData.documentId || inputData.sheetId || "ID_DESCONHECIDO",
+                sheetName: inputData.sheetName || "Postagens"
+            }
+        }
+    };
+}
+
+// Se nenhuma linha disponível for encontrada, lança um erro
+throw new Error('🚨 Nenhuma linha disponível para postagem na planilha. Verifique se há dados não postados.');
