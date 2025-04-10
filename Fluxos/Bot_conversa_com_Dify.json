@@ -1,0 +1,1311 @@
+{
+  "name": "Bot conversa com Dify",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "conversation",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1740,
+        -60
+      ],
+      "id": "af5e53ca-eedf-4e4b-bf70-9d243d018bf0",
+      "name": "Webhook",
+      "webhookId": "2e6adac8-72a9-4cb3-86d7-63f15ca73de4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37f502df-c0fb-4d7e-b27d-71fe248bee7b",
+              "name": "instance",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "5c4dc684-b07b-4a0f-b1f1-903079b7008e",
+              "name": "num_cliente",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "9478c9d8-f092-4338-a9e8-5c56543225ca",
+              "name": "num_empresa",
+              "value": "={{ $json.body.sender }}",
+              "type": "string"
+            },
+            {
+              "id": "bd05c832-a406-4b7c-8349-f2233d52bef0",
+              "name": "msg",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "a9939466-4546-42a8-aaed-aea7335d25e3",
+              "name": "nome_cliente",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "199ff1a5-a1fb-4df2-b911-64c5967aa2da",
+              "name": "msg_Type",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            },
+            {
+              "id": "1070bf7e-d888-48a4-a31d-8e485f8efbbf",
+              "name": "msg_id",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e358255f-f8c8-4bbb-be3f-1f086b5ebf29",
+              "name": "base64",
+              "value": "={{ $json.body.data.message.base64 }}",
+              "type": "string"
+            },
+            {
+              "id": "dcfd18d7-f81a-46a9-8c6e-bd71c13eea42",
+              "name": "instanceID_cliente",
+              "value": "={{ $json.body.data.instanceId }}{{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1480,
+        -60
+      ],
+      "id": "888a4f6d-a2e1-4e98-a8ac-660aacedea7f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "859fede0-46a6-45c2-bd4e-b8002b643afb",
+              "leftValue": "={{ $('Webhook').item.json.body.data.key.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1200,
+        -60
+      ],
+      "id": "4dedb31f-1b7c-4f87-a336-51677bfdf06e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Empresa",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "TelefoneWhatsapp",
+              "keyValue": "={{ $json.num_empresa }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -240
+      ],
+      "id": "a1628d82-14f9-4996-bec0-c25458e7b1c7",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "azppAtssnYYK9OdD",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Clientes",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "IDempresa",
+              "condition": "eq",
+              "keyValue": "={{ $item(\"0\").$node[\"Supabase\"].json[\"id\"] }}"
+            },
+            {
+              "keyName": "whatsapp",
+              "condition": "eq",
+              "keyValue": "={{ $('Edit Fields').item.json.num_cliente }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "botativo",
+              "fieldValue": "false"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        -240
+      ],
+      "id": "4c090645-1895-4e2c-a9af-937d18c98017",
+      "name": "Supabase2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "azppAtssnYYK9OdD",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Empresa",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "TelefoneWhatsapp",
+              "keyValue": "={{ $('Edit Fields').item.json.num_empresa }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -980,
+        40
+      ],
+      "id": "afd89bef-6dac-4a8d-b306-619377ca6232",
+      "name": "Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "azppAtssnYYK9OdD",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Clientes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "keyValue": "={{ $('Edit Fields').item.json.num_cliente }}"
+            },
+            {
+              "keyName": "IDempresa",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        40
+      ],
+      "id": "63785489-8926-4ac4-b42f-672585db5fe3",
+      "name": "Supabase3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "azppAtssnYYK9OdD",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a0bd8c7c-a7ea-46d9-898b-60b9f6aac01b",
+              "leftValue": "={{ $json.whatsapp }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -580,
+        40
+      ],
+      "id": "b254dfb8-c61f-4a54-9d52-7f44a0d84c17",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "tableId": "Clientes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Edit Fields').item.json.nome_cliente }}"
+            },
+            {
+              "fieldId": "whatsapp",
+              "fieldValue": "={{ $('Edit Fields').item.json.num_cliente }}"
+            },
+            {
+              "fieldId": "IDempresa",
+              "fieldValue": "={{ $('Supabase1').item.json.id }}"
+            },
+            {
+              "fieldId": "botativo",
+              "fieldValue": "true"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        160
+      ],
+      "id": "c6d6516d-c549-4ccd-af22-c7c3a1da0b3e",
+      "name": "Supabase4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "azppAtssnYYK9OdD",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -240
+      ],
+      "id": "005e511e-2fa4-44d2-9644-8937d1c9b9c6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6e741fa1-5c97-46c3-a61f-ced9698ecd0e",
+              "leftValue": "={{ $json.botativo }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -360,
+        -60
+      ],
+      "id": "050a61c1-713b-4c3e-bda1-9d547facbdb5",
+      "name": "bot inativo?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "001a0520-6ef0-49c4-9701-57347bea6e09",
+              "leftValue": "={{ $('Edit Fields').item.json.msg_Type }}",
+              "rightValue": "=audioMessage",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        -40
+      ],
+      "id": "8f953eb1-b4c3-46e5-85ee-4bc8594d97a3",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c55e1f58-be60-4d19-9477-388509767a69",
+              "name": "base64",
+              "value": "={{ $('Edit Fields').item.json.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        -160
+      ],
+      "id": "3aa5f869-ce22-415b-bddc-1b9e43ed5771",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "base64",
+        "options": {
+          "fileName": "audio.mp3",
+          "mimeType": "audio/mpeg"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        -160
+      ],
+      "id": "145cb38c-526f-4c98-bc28-96867e6879db",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0025785f-25ca-42c1-bcc3-427f9f3a8d41",
+              "name": "text",
+              "value": "={{ $json.text }}{{ $('Edit Fields').item.json.msg }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        -20
+      ],
+      "id": "f34f5e38-b3fb-4084-964d-45a4dcc14f3b",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        520,
+        -160
+      ],
+      "id": "956b56d5-618b-47fb-86f4-faf8989db405",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "YGTnaJqjktesz2kH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Edit Fields').item.json.instanceID_cliente }}",
+        "messageData": "={{ $json.text }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        980,
+        -20
+      ],
+      "id": "d422ead5-29d9-47f7-98fa-9fe8afc98165",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "LN4faAPij8p88786",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1160,
+        -20
+      ],
+      "id": "09eae1c5-90cc-4850-934a-312169e083ea",
+      "name": "Wait",
+      "webhookId": "9d90e126-5096-446c-99fb-a4df28f21cd1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Edit Fields').item.json.instanceID_cliente }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        -20
+      ],
+      "id": "1a05f004-6d7d-45d6-8449-31699f65236c",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "LN4faAPij8p88786",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2a21a108-4e21-4fec-a806-cfabd4a5142b",
+              "leftValue": "={{ $json.propertyName.last() }}",
+              "rightValue": "={{ $('Edit Fields2').item.json.text }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        -20
+      ],
+      "id": "d9988be5-1dd7-4087-9fa3-643d5cab80cb",
+      "name": "If3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1900,
+        -200
+      ],
+      "id": "9f0d08d8-6c2b-4358-9ea7-b8bf7dd69626",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Edit Fields').item.json.instanceID_cliente }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        0
+      ],
+      "id": "47379d60-4583-4770-9ffa-e8ed4a41d388",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "LN4faAPij8p88786",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce1ba4c6-aabb-4355-b1f5-f34567302223",
+              "name": "mensagem",
+              "value": "={{ $json[\"propertyName\"].join(\", \") }}",
+              "type": "string"
+            },
+            {
+              "id": "28e5601b-9db8-491a-8673-ab2fa71f41da",
+              "name": "conversaDify_id",
+              "value": "={{ $('Supabase3').item.json.conversaDify_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2140,
+        0
+      ],
+      "id": "bb40e516-276d-4a34-bbd0-66e5a1dabe6d",
+      "name": "Edit Fields3",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-dify.automacao-flash.shop/v1/chat-messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer app-V8zRvZbnkIKn2QkaMrXuKATv"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"inputs\": {\n  \"dataHoje\": \"{{ $now.format('dd LLL yyyy')}}\",\n  \"diaSemana\": \"{{ $now.weekdayLong}}\"\n  },\n  \"query\": \"{{ $json.mensagem }}\",\n  \"response_mode\": \"blocking\",\n  \"conversation_id\": \"{{ $('If1').item.json.conversaDify_id }}\",\n  \"user\": \"{{ $('If1').item.json.whatsapp }}\",\n  \"files\": [\n    {\n      \"type\": \"image\",\n      \"transfer_method\": \"remote_url\",\n      \"url\": \"https://cloud.dify.ai/logo/logo-site.png\"\n    }\n  ]\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2360,
+        0
+      ],
+      "id": "a19e993f-aea5-4043-8655-5d6b1550e437",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "28a64c42-ef49-4ae9-b07f-f59808a09e2a",
+              "leftValue": "={{ $('Supabase3').item.json.conversaDify_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2580,
+        0
+      ],
+      "id": "d56d2b2d-0650-4822-b09f-8dbc5a74fae0",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Clientes",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "condition": "eq",
+              "keyValue": "={{ $('Edit Fields').item.json.num_cliente }}"
+            },
+            {
+              "keyName": "IDempresa",
+              "condition": "eq",
+              "keyValue": "={{ $('Supabase1').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "conversaDify_id",
+              "fieldValue": "={{ $('HTTP Request').item.json.conversation_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2820,
+        -100
+      ],
+      "id": "7b7d5642-af5e-42e6-a675-653abf59d58c",
+      "name": "Supabase5",
+      "credentials": {
+        "supabaseApi": {
+          "id": "azppAtssnYYK9OdD",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6a2d15c6-57fb-4d40-8662-1409015a0e6d",
+              "name": "answer",
+              "value": "={{ $json.answer.split(/(?<=\\.\\s)|(?<=!\\s)|(?<=\\?\\s)/).map(part => part.trim()).filter(part => part.length > 0) }}",
+              "type": "array"
+            },
+            {
+              "id": "e752e20c-9866-40ef-bc5b-4acad482c378",
+              "name": "conversation_id",
+              "value": "={{ $json.conversation_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3260,
+        40
+      ],
+      "id": "ac6f6504-f9d0-4c30-9b80-24acf7c76423",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "answer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        3440,
+        40
+      ],
+      "id": "f4a0dda4-3d5f-417c-bf5f-32dce267f390",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        3080,
+        40
+      ],
+      "id": "f1dbb103-f51a-49ac-b8ba-04f98ca9ecd6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3660,
+        40
+      ],
+      "id": "d691fa09-59f1-4f10-89fe-aec98901ad67",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        60
+      ],
+      "id": "681b5f10-1f4b-4dfd-ac0d-a1f18836f589"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4340,
+        360
+      ],
+      "id": "9cfddbaf-64ef-473a-b0a7-7c3c41adec3a",
+      "name": "Wait1",
+      "webhookId": "78dcc521-038a-4dd1-9bae-2c7a078b7958"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Camila",
+        "remoteJid": "={{ $item(\"0\").$node[\"Webhook\"].json[\"body\"][\"data\"][\"key\"][\"remoteJid\"] }}",
+        "messageText": "={{ $json.answer }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        4120,
+        60
+      ],
+      "id": "19958d51-b328-45dd-acb4-7e3443041174",
+      "name": "Evolution API",
+      "credentials": {
+        "evolutionApi": {
+          "id": "Yzv0J70qP2mejRxI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        -120
+      ],
+      "id": "6da4d079-deb2-4ab4-9fc9-8785f5ea6b80",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Webhook').item.json.body.server_url }}/chat/sendPresence/{{ $('Webhook').item.json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Webhook').item.json.body.apikey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook').item.json.body.data.key.remoteJid }}\",\n \"delay\": 5000,\n    \"presence\": \"composing\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4340,
+        60
+      ],
+      "id": "53d8e98e-8aa5-40ae-936b-818d01761d6b",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Supabase2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase1": {
+      "main": [
+        [
+          {
+            "node": "Supabase3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase3": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "bot inativo?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase4": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bot inativo?": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Supabase5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Evolution API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        []
+      ]
+    },
+    "Evolution API": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "189f00fe-e0ee-480a-8ed8-95dd5853b876",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ef267a26857af28341f2010fdf4502dc862f239e8fd42302b1ce6f5544e5252c"
+  },
+  "id": "jQ8NErlHcWAdYGi5",
+  "tags": []
+}
